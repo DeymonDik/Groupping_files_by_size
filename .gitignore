@@ -362,9 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Res
-/ffmpeg-6.1
-/MediaInfo(1).dll
-/MediaInfo.Wrapper.dll
-/resource.h
 /MediaInfo.dll
 /Dest

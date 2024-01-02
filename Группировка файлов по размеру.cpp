@@ -1,10 +1,4 @@
-﻿#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <algorithm>
-#include <Windows.h>
-
-namespace fs = std::filesystem;
+﻿#include "Группировка файлов по размеру.h"
 
 struct GetParameter {
 	virtual long long getParameter(const fs::path& entryPath) const = 0;
@@ -194,6 +188,15 @@ struct Clasters {
 struct PathFromTo {
 	fs::path from;
 	fs::path to;
+	PathFromTo(fs::path from, fs::path to) {
+		if (fs::exists(from)) {
+			this->from = from;
+			this->to = to;
+		}
+		else {
+			throw std::exception(("Такого каталога не существует: \"" + from.string() + "\"").c_str());
+		}
+	}
 };
 
 class Grouping {
@@ -207,7 +210,7 @@ void recursive(std::vector<ParamFile>& files, long long& summSize, const fs::pat
 		{
 			long long size = param->getParameter(entry.path());
 			summSize += size;
-			files.push_back({entry.path(), size});
+			files.push_back({ entry.path(), size });
 		}
 		else if (fs::is_directory(entry.path())) {
 			recursive(files, summSize, entry.path(), param);
@@ -293,7 +296,7 @@ void groupFilesBySize(const PathFromTo& fromTo, const long long& sizeGroup)
 	{
 		fs::path sizeFolder = fromTo.to.wstring() + L"\\" + std::to_wstring(i);
 		fs::create_directory(sizeFolder);
-		folders.push_back({sizeFolder, 0});
+		folders.push_back({ sizeFolder, 0 });
 	}
 
 	// Сортировка файлов по убыванию размера
@@ -316,7 +319,7 @@ void groupFilesBySize(const PathFromTo& fromTo, const long long& sizeGroup)
 
 void groupFilesByClasters(const PathFromTo& fromTo, const int& quantity) {
 	// Создаем папку назначения, если она не существует
-	fs::create_directory(fromTo.to);
+	bool isli = fs::create_directory(fromTo.to);
 
 	// Получаем список всех файлов в исходной и вложенных папках
 	std::vector<ParamFile> files;
@@ -326,7 +329,7 @@ void groupFilesByClasters(const PathFromTo& fromTo, const int& quantity) {
 	delete get;
 	if (!summSize)
 	{
-		std::cout << "Файлов не найдено!" << std::endl;
+		std::wcout << L"Файлов не найдено!" << std::endl;
 		return;
 	}
 
@@ -510,45 +513,53 @@ void renameFiles(const std::string& sourceDir, const bool& subFolders = false) {
 
 int main()
 {
-	setlocale(LC_ALL, "");
+	try {
+		setlocale(LC_ALL, "");
 
-	//int choise{}, sizeGroup{};
-	PathFromTo fromTo{L"Res", L"Dest"};
 
-//START:
-//	std::cout << "Введите номер Б = 0, КБ = 1, МБ = 2, ГБ = 3: ";
-//	std::cin >> choise;
-//
-//	std::cout << "Введите размер группы файлов: ";
-//	std::cin >> sizeGroup;
-//
-//	switch (choise)
-//	{
-//	case 3:
-//		sizeGroup *= 1000;
-//	case 2:
-//		sizeGroup *= 1000;
-//	case 1:
-//		sizeGroup *= 1000;
-//	case 0:
-//		break;
-//	default:
-//		system("cls");
-//		goto START;
-//	}
+		//int choise{}, sizeGroup{};
+		PathFromTo fromTo{ L"Res", L"Dest" };
 
-	//groupFilesByFrequent(sourceDir, destinationDir);
+		//START:
+		//	std::cout << "Введите номер Б = 0, КБ = 1, МБ = 2, ГБ = 3: ";
+		//	std::cin >> choise;
+		//
+		//	std::cout << "Введите размер группы файлов: ";
+		//	std::cin >> sizeGroup;
+		//
+		//	switch (choise)
+		//	{
+		//	case 3:
+		//		sizeGroup *= 1000;
+		//	case 2:
+		//		sizeGroup *= 1000;
+		//	case 1:
+		//		sizeGroup *= 1000;
+		//	case 0:
+		//		break;
+		//	default:
+		//		system("cls");
+		//		goto START;
+		//	}
 
-	groupFilesByClasters(fromTo, 4);
+			//groupFilesByFrequent(sourceDir, destinationDir);
 
-	auto pair = deleteEmptyFolders(fromTo.from);
+		groupFilesByClasters(fromTo, 2);
 
-	std::cout << "Удалено папок: " << pair.first << std::endl;
-	std::cout << "Файлов обнаружено при удалении: " << pair.second << std::endl;
+		auto pair = deleteEmptyFolders(fromTo.from);
 
-	//renameFiles(destinationDir, true);
+		std::cout << "Удалено папок: " << pair.first << std::endl;
+		std::cout << "Файлов обнаружено при удалении: " << pair.second << std::endl;
 
-	system("pause");
+		fs::remove(fromTo.from);
+		//renameFiles(destinationDir, true);
 
-	return 0;
+		system("pause");
+		return 0;
+	}
+	catch (std::exception& ex) {
+		std::cout << ex.what() << std::endl;
+		system("pause");
+		return 0;
+	}
 }

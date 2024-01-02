@@ -132,6 +132,9 @@
   <ItemGroup>
     <ClCompile Include="Группировка файлов по размеру.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Группировка файлов по размеру.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
